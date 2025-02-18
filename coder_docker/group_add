@@ -1,0 +1,2 @@
+getent group docker | cut -d: -f3
+986
