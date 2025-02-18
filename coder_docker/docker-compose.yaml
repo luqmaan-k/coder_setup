@@ -14,7 +14,7 @@ services:
       # or 127.0.0.1 for non-Docker templates!
     # DOCUMENT THIS
       CODER_ACCESS_URL: "http://10.1.67.161:7080"
-      CODER_PROVISIONER_DAEMONS: 40
+      CODER_PROVISIONER_DAEMONS: 10
     # Need to ask access for local dns resolving for below
     # CODER_WILDCARD_ACCESS_URL: "*.coder.local"
     # If the coder user does not have write permissions on
@@ -56,6 +56,4 @@ services:
       retries: 5
 volumes:
   coder_data:
-    external: true
   coder_home:
-    external: true
