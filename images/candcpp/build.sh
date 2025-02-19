@@ -1,1 +1,1 @@
-docker build -t candcpp:latest .
+docker build -t local/candcpp:latest -t local/candcpp:v1 .

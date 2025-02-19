@@ -20,10 +20,10 @@ RUN apt-get update && \
 # Ensure `python` points to python3
 RUN ln -sf /usr/bin/python3 /usr/bin/python
 
-# Create a virtual environment in /home/coder/venv and install data science packages including Jupyter and ipykernel
-RUN python3 -m venv /home/coder/venv && \
-    /home/coder/venv/bin/pip install --upgrade pip setuptools && \
-    /home/coder/venv/bin/pip install \
+# Create a virtual environment in /opt/venv (outside of the home directory)
+RUN python3 -m venv /opt/venv && \
+    /opt/venv/bin/pip install --upgrade pip setuptools && \
+    /opt/venv/bin/pip install \
       numpy \
       pandas \
       matplotlib \
@@ -33,10 +33,11 @@ RUN python3 -m venv /home/coder/venv && \
       jupyter \
       torch \
       ipykernel && \
-    chown -R coder:coder /home/coder/venv
+    chown -R coder:coder /opt/venv
 
 # Switch to coder user
 USER coder
 
 # Set up the Jupyter kernel from the virtual environment
-RUN /home/coder/venv/bin/python -m ipykernel install --user --name=venv --display-name="DataScience"
+RUN /opt/venv/bin/python -m ipykernel install --user --name=venv --display-name="DataScience"
+

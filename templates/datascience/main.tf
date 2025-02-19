@@ -63,6 +63,22 @@ resource "coder_agent" "main" {
     interval     = 10
     timeout      = 1
   }
+
+  metadata {
+    display_name = "Home Disk"
+    key          = "3_home_disk"
+    script       = "coder stat disk --path $${HOME}"
+    interval     = 60
+    timeout      = 1
+  }
+}
+
+module "jupyterlab" {
+  count    = data.coder_workspace.me.start_count
+  source   = "registry.coder.com/modules/jupyterlab/coder"
+  version  = "1.0.23"
+  agent_id = coder_agent.main.id
+  subdomain = false
 }
 
 # See https://registry.coder.com/modules/code-server
@@ -74,7 +90,10 @@ module "code-server" {
   version = ">= 1.0.0"
 
   agent_id = coder_agent.main.id
-  order    = 1
+  order    = 2
+  
+  use_cached = true
+  install_prefix = "/home/coder/.code_server_cache"
 }
 
 module "filebrowser" {
@@ -115,7 +134,7 @@ resource "docker_volume" "home_volume" {
 
 resource "docker_container" "workspace" {
   count = data.coder_workspace.me.start_count
-  image = "local/candcpp"
+  image = "local/datascience"
   # Uses lower() to avoid Docker restriction on container names.
   name = "coder-${data.coder_workspace_owner.me.name}-${lower(data.coder_workspace.me.name)}"
   # Hostname makes the shell more user friendly: coder@my-workspace:~$
