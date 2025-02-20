@@ -1,0 +1,1 @@
+After entering the container through terminal you can connect to the db using mongosh
