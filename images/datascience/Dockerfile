@@ -32,6 +32,7 @@ RUN python3 -m venv /opt/venv && \
       tensorflow \
       jupyter \
       torch \
+      opencv-python-headless \
       ipykernel && \
     chown -R coder:coder /opt/venv
 
