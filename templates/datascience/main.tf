@@ -107,7 +107,19 @@ module "filebrowser" {
 
 resource "docker_volume" "home_volume" {
   name = "coder-${data.coder_workspace.me.id}-home"
-  # Protect the volume from being deleted due to changes in attributes.
+ 
+  # Use the docker-volume-loopback plugin to limit storage
+
+  driver = "docker-volume-loopback"
+  driver_opts = {
+    sparse = "true"
+    fs     = "ext4"
+    size   = "50G"
+    uid    = "1000"
+    gid    = "1000"
+    mode   = "755"
+  }
+ # Protect the volume from being deleted due to changes in attributes.
   lifecycle {
     ignore_changes = all
   }

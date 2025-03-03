@@ -63,6 +63,14 @@ resource "coder_agent" "main" {
     interval     = 10
     timeout      = 1
   }
+
+  metadata {
+    display_name = "Home Disk"
+    key          = "3_home_disk"
+    script       = "coder stat disk --path $${HOME}"
+    interval     = 60
+    timeout      = 1
+  }
 }
 
 # See https://registry.coder.com/modules/code-server
@@ -88,6 +96,18 @@ module "filebrowser" {
 
 resource "docker_volume" "home_volume" {
   name = "coder-${data.coder_workspace.me.id}-home"
+  
+  # Use the docker-volume-loopback plugin to limit storage
+
+  driver = "docker-volume-loopback"
+  driver_opts = {
+    sparse = "true"
+    fs     = "ext4"
+    size   = "10G"
+    uid    = "1000"
+    gid    = "1000"
+    mode   = "755"
+  }
   # Protect the volume from being deleted due to changes in attributes.
   lifecycle {
     ignore_changes = all
