@@ -1,12 +1,13 @@
 #!/bin/bash
-# Script: create_range_users.sh
+# Script: create_users.sh
 # Description: Creates users in parallel using the Coder CLI.
 #              Users are generated based on a given prefix and a numeric range.
 #              Each user gets an email and password in the format: <username>@organisation.com.
-#              Successes and failures are logged separately.
+#              The script logs command outputs and statuses (with a separator) in a main log file.
+#              For failures, it logs a simplified message in a separate failure log.
 #
-# Usage: ./create_range_users.sh <prefix> <start> <end>
-# Example: ./create_range_users.sh admins 01 30
+# Usage: ./create_users.sh <prefix> <start> <end>
+# Example: ./create_users.sh admins 01 30
 #
 # Ensure you are logged in as an admin using the Coder CLI before running this script.
 
@@ -44,26 +45,45 @@ log_msg() {
 }
 
 # Function: create_user
-# Creates a user for a given numeric value, logs the executed command and its success or failure.
+# Creates a user for a given numeric value, logs the executed command and its output.
 create_user() {
     local i="$1"
     # Format the number with leading zeros (keeping two digits; adjust if needed)
     user=$(printf "%s%02d" "$PREFIX" "$i")
-    email="${user}@organisation.com"
+    email="${user}@psgtech.ac.in"
     
     # Construct the command.
-    cmd="coder users create --name \"$user\" --email \"$email\" --password \"$email\""
+    # Note: Using --username as per the CLI documentation.
+    cmd="coder users create --username \"$user\" --email \"$email\" --password \"$email\""
     
-    # Execute the command.
-    eval $cmd
+    # Capture command output (both stdout and stderr) and exit code.
+    out=$(eval $cmd 2>&1)
     exit_code=$?
     
-    # Log the result using file locks.
+    # Build the log message for the command log.
     if [ $exit_code -eq 0 ]; then
-        log_msg "$COMMAND_LOG" "SUCCESS: $cmd"
+        log_message="SUCCESS: $cmd (exit code: $exit_code)
+Output:
+$out
+------
+"
     else
-        log_msg "$COMMAND_LOG" "FAILURE: $cmd (exit code: $exit_code)"
-        log_msg "$FAIL_LOG" "FAILURE: $cmd (exit code: $exit_code)"
+        log_message="FAILURE: $cmd (exit code: $exit_code)
+Output:
+$out
+------
+"
+    fi
+
+    # Log to command log.
+    log_msg "$COMMAND_LOG" "$log_message"
+    
+    # For failures, also log a simplified message in the failure log.
+    if [ $exit_code -ne 0 ]; then
+        fail_message="FAILURE: $cmd (exit code: $exit_code)
+------
+"
+        log_msg "$FAIL_LOG" "$fail_message"
     fi
 }
 
@@ -82,4 +102,9 @@ done
 wait
 
 echo "User creation completed. Logs are stored in ${LOG_DIR}"
+
+# Notify if a failure log was created.
+if [ -f "$FAIL_LOG" ]; then
+    echo "Failure log created: ${FAIL_LOG}"
+fi
 
