@@ -19,7 +19,7 @@
 
 | Resource       | Value |
 | -------------- | ----- |
-| Home Disk Size | 1GB   |
+| Home Disk Size | 2GB   |
 | CPU            | ~     |
 | Memory         | 16GB  |
 

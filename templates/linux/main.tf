@@ -117,7 +117,7 @@ resource "docker_volume" "home_volume" {
   driver_opts = {
     sparse = "true"
     fs     = "ext4"
-    size   = "1G"
+    size   = "2G"
     uid    = "1000"
     gid    = "1000"
     mode   = "755"
