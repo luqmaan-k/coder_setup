@@ -17,6 +17,7 @@ services:
     depends_on:
       database:
         condition: service_healthy
+    restart: unless-stopped
   database:
     image: "postgres:16"
     ports:
@@ -36,6 +37,7 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    restart: unless-stopped
 volumes:
   coder_data:
     driver: local
