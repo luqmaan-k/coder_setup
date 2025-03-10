@@ -39,7 +39,7 @@ Open MP,Open MPI
 | -------------- | ----- |
 | Home Disk Size | 1GB   |
 | CPU            | ~     |
-| Memory         | 4GB   |
+| Memory         | 16GB  |
 
 ---
 > #### Note

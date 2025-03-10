@@ -38,6 +38,8 @@ resource "coder_agent" "main" {
     if [ ! -f ~/.init_done ]; then
       cp -rT /etc/skel ~
       touch ~/.init_done
+      # Install Kernel for the first time
+      /opt/venv/bin/python -m ipykernel install --user --name=venv --display-name="DataScience"
     fi
 
     # Add any commands that should be executed at workspace startup (e.g install requirements, start a program, etc) here
@@ -160,6 +162,8 @@ resource "docker_container" "workspace" {
   image = "local/datascience"
   # Uses lower() to avoid Docker restriction on container names.
   name = "coder-${data.coder_workspace_owner.me.name}-${lower(data.coder_workspace.me.name)}"
+  # Memory
+  memory=65536
   # Hostname makes the shell more user friendly: coder@my-workspace:~$
   hostname = data.coder_workspace.me.name
   # Use the docker gateway if the access URL is 127.0.0.1

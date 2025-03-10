@@ -149,6 +149,8 @@ resource "docker_container" "workspace" {
   image = "local/candcpp"
   # Uses lower() to avoid Docker restriction on container names.
   name = "coder-${data.coder_workspace_owner.me.name}-${lower(data.coder_workspace.me.name)}"
+  # Memory
+  memory=16384
   # Hostname makes the shell more user friendly: coder@my-workspace:~$
   hostname = data.coder_workspace.me.name
   # Use the docker gateway if the access URL is 127.0.0.1
