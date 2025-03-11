@@ -1,4 +1,4 @@
-site_name: Coder Docs
-site_url: https://mydomain.org/mysite
+site_name: AMCS Coder docs
+site_url: http://amcscoder.psgtech/docs
 theme:
   name: material
