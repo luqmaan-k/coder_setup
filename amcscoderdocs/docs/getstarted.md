@@ -1,5 +1,7 @@
+# Get Started
+
 ## First time login
-1. Open up a browser and navigate to http://amcscoder.psgtech/
+1. Open up a browser and navigate to [amcscoder.psgtech/](http://amcscoder.psgtech/)
 2. Enter your email id and the first time password is the same email id
 ![Image](resources/images/login.png)
 3. Click on the square in the top right (highlighted green) and click on account settings (red)
@@ -41,10 +43,11 @@ Make sure to check the template docs to know the consequences of deleting a work
 Always make sure to keep backups of your code in another machine or github (or both)
 ```
 
-## How to connect to a workspace
+## Connect to a workspace
 - Make sure the workspace is running and depending on the template used to create a workspace you will be given a list of **apps** that you can use to connect to workspace like below
 - Click on the app that you would like to connect to the workspace with
 ![Image](resources/images/workspaceapps.png)
+### Desktop Apps
 - Some applications are desktop applications ie : they connect directly to a desktop application if it is installed in the local machine like VS Code Desktop
 - These apps will require you to click on a redirect link as show below
 ![Image](resources/images/vscodedesktop.png)
@@ -53,8 +56,10 @@ Note : after clicking on the link they may ask you to install an extension, foll
 If a connection didnt work try clicking on the app once more.
 Some apps will take some time to establish a connection which may take a few minutes for the first time , they should ideally be faster for that workspace afterwards.
 ```
+### Browser Apps
 - Browser based apps will open a new browser window/tab with the application 
 - By default most workspaces will have  a terminal browser app that can be used to open a terminal in the workspace to either work in or to debug any issues
+
 ## How to disconnect/logout
 
 - #### Always log out if you are working in a lab
