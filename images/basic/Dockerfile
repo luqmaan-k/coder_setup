@@ -13,18 +13,7 @@ RUN apt-get update && \
     nano \
     vim \
     neovim \
-    gcc \
-    g++ \
-    clang \
-    cmake \
-    make \
-    gdb \
-    libopenmpi-dev \
-    libomp-dev \
     && rm -rf /var/lib/apt/lists/*
-
-# Set Vim as the default editor for vi
-RUN update-alternatives --set vi /usr/bin/vim
 
 # Clean up
 RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
