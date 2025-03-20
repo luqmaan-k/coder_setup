@@ -209,8 +209,8 @@ resource "coder_metadata" "Neo4j-link" {
   count = data.coder_workspace.me.start_count
   resource_id = docker_container.workspace[0].id 
   item {
-    key = "Link"
-    value = "7687--main--${data.coder_workspace.me.name}--${data.coder_workspace_owner.me.name}.amcscoder.psgtech" 
-  # Try to change --^ to a generalised resource name instead and also this if possible--------------^
+    key = "Neo4j database Link"
+    value = "7687--main--${data.coder_workspace.me.name}--${data.coder_workspace_owner.me.name}.amcscoder.psgtech:80" 
+  # Try to change --^ to a generalised resource name instead and also this if possible--------------^         NOTE!^ - we need to specify port also apparently
   }
 }
