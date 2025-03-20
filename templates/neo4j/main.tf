@@ -193,7 +193,7 @@ resource "coder_app" "neo4j" {
 
   slug         = "neo4j"
 
-  display_name = "Neo4j"
+  display_name = "Neo4j-web"
 
   url          = "http://localhost:7474"
 
@@ -203,4 +203,14 @@ resource "coder_app" "neo4j" {
 
   share        = "owner"
 
+}
+
+resource "coder_metadata" "Neo4j-link" {
+  count = data.coder_workspace.me.start_count
+  resource_id = docker_container.workspace[0].id 
+  item {
+    key = "Link"
+    value = "7687--main--${data.coder_workspace.me.name}--${data.coder_workspace_owner.me.name}.amcscoder.psgtech" 
+  # Try to change --^ to a generalised resource name instead and also this if possible--------------^
+  }
 }

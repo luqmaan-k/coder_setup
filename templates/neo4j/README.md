@@ -3,9 +3,9 @@
 ## About
 ---
 ### How to use 
-- Open the port 7687 in the ports menu 
-- Note that you need to do this only once
-- Use the link provided for the port to login into neo4j (disable authentication , in the authentication type menu)
+- Open the port 7687 in the ports menu
+- Use the link provided in the metadata area to login into neo4j (disable authentication in the neo4j browser , in the authentication type menu)
+- Note that you need to do this only once and neo4j remembers over workspace restarts
 ---
 ### Environment
 - Ubuntu based
