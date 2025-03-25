@@ -14,7 +14,7 @@ RUN apt-get update && \
       vim \
       neovim \
       wget \
-      openjdk-11-jdk && \
+      openjdk-17-jdk && \
     rm -rf /var/lib/apt/lists/*
 
 # Create persistent directories for data
@@ -64,6 +64,11 @@ RUN tar xzvf /tmp/kafka_2.13-4.0.0.tgz -C /opt/ && \
 # Clean up apt caches and temporary files
 RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
+RUN mkdir -p /opt/hbase/logs /opt/cassandra/logs /opt/kafka/logs /opt/spark/logs && \
+    chown -R coder:coder /opt/hbase /opt/cassandra /opt/spark /opt/kafka
+
 # Switch back to coder user
 USER coder
 
+ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+ENV PATH="/opt/hbase/bin:/opt/cassandra/bin:/opt/spark/bin:/opt/kafka/bin:${PATH}"

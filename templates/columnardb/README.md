@@ -1,13 +1,13 @@
-# Base Template
-
-> [!NOTE]
-> Use this as a base template 
+# Columnar DB
 
 ## About
 ---
-### (Template Specific )
- ^ Replace with Application name or something that makes sense
-- Example : Python venv is in /opt/venv ...etc
+### Tools
+The following tools are installed 
+- kafka
+- spark
+- cassandraz 
+- hbase
 ---
 ### Environment
 - Ubuntu based
