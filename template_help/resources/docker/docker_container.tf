@@ -2,7 +2,7 @@
 # Dependencies : data.coder_workspace,data.coder_workspace_owner,coder_agent
 REPLACE_ME_AGENT_NAME
 
-resource "docker_container" "workspace" {
+resource "docker_container" "workspace_REPLACE_ME_WORKSPACE_NUMBER" {
   count = data.coder_workspace.me.start_count
   # MAKE SURE TO USE THE RIGHT IMAGE
   image = "codercom/enterprise-base:ubuntu"
