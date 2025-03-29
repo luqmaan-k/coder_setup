@@ -1,1 +1,1 @@
-docker build -t local/columnardb:latest -t local/columnardb:v1 .
+docker build -t local/columnardb:latest -t local/columnardb:v2 .

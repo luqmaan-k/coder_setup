@@ -13,8 +13,7 @@ RUN apt-get update && \
       nano \
       vim \
       neovim \
-      wget \
-      openjdk-17-jdk && \
+      wget && \
     rm -rf /var/lib/apt/lists/*
 
 # Create persistent directories for data
@@ -28,19 +27,43 @@ COPY hbase-2.5.11-bin.tar.gz /tmp/
 COPY apache-cassandra-5.0.3-bin.tar.gz /tmp/
 COPY spark-3.5.5-bin-hadoop3.tgz /tmp/
 COPY kafka_2.13-4.0.0.tgz /tmp/
+COPY jdk-8u202-linux-x64.tar.gz /tmp/
+
+### Install jdk 8
+RUN tar xzvf /tmp/jdk-8u202-linux-x64.tar.gz -C /opt/ && \
+    mv /opt/jdk1.8.0_202 /opt/jdk-8 
 
 ### Install Apache HBase
 # Extract HBase and create a minimal hbase-site.xml setting hbase.rootdir to /home/coder/hbase_data
 RUN tar xzvf /tmp/hbase-2.5.11-bin.tar.gz -C /opt/ && \
     mv /opt/hbase-2.5.11 /opt/hbase && \
-    echo '<?xml version="1.0"?>' > /opt/hbase/conf/hbase-site.xml && \
-    echo '<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>' >> /opt/hbase/conf/hbase-site.xml && \
-    echo '<configuration>' >> /opt/hbase/conf/hbase-site.xml && \
-    echo '  <property>' >> /opt/hbase/conf/hbase-site.xml && \
-    echo '    <name>hbase.rootdir</name>' >> /opt/hbase/conf/hbase-site.xml && \
-    echo '    <value>file:///home/coder/hbase_data</value>' >> /opt/hbase/conf/hbase-site.xml && \
-    echo '  </property>' >> /opt/hbase/conf/hbase-site.xml && \
-    echo '</configuration>' >> /opt/hbase/conf/hbase-site.xml
+    /bin/sh -c "printf '%s\n' \
+      '<?xml version=\"1.0\"?>' \
+      '<?xml-stylesheet type=\"text/xsl\" href=\"configuration.xsl\"?>' \
+      '<configuration>' \
+      '    See also https://hbase.apache.org/book.html#standalone_dist' \
+      '  -->' \
+      '  <property>' \
+      '    <name>hbase.cluster.distributed</name>' \
+      '    <value>false</value>' \
+      '  </property>' \
+      '  <property>' \
+      '    <name>hbase.rootdir</name>' \
+      '    <value>file:///opt/hbase</value>' \
+      '  </property>' \
+      '  <property>' \
+      '    <name>hbase.zookeeper.property.dataDir</name>' \
+      '    <value>/opt/hbase/zookeeper</value>' \
+      '  </property>' \
+      '  <property>' \
+      '    <name>hbase.tmp.dir</name>' \
+      '    <value>/opt/hbase/tmp</value>' \
+      '  </property>' \
+      '  <property>' \
+      '    <name>hbase.unsafe.stream.capability.enforce</name>' \
+      '    <value>false</value>' \
+      '  </property>' \
+      '</configuration>' > /opt/hbase/conf/hbase-site.xml"
 
 ### Install Apache Cassandra
 # Extract Cassandra and update cassandra.yaml to store data under /home/coder/cassandra_data
@@ -70,5 +93,6 @@ RUN mkdir -p /opt/hbase/logs /opt/cassandra/logs /opt/kafka/logs /opt/spark/logs
 # Switch back to coder user
 USER coder
 
-ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
-ENV PATH="/opt/hbase/bin:/opt/cassandra/bin:/opt/spark/bin:/opt/kafka/bin:${PATH}"
+ENV JAVA_HOME=/opt/jdk-8
+ENV PATH="/opt/jdk-8/bin/:/opt/hbase/bin:/opt/cassandra/bin:/opt/spark/bin:/opt/kafka/bin:${PATH}"
+ENV HBASE_OPTS="-Djava.net.preferIPv4Stack=true"
