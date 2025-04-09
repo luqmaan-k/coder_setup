@@ -1,12 +1,17 @@
 #!/bin/bash
-# Script: delete_users.sh
-# Description: Deletes users in parallel using the Coder CLI.
-#              Users to delete are determined by a given prefix and numeric range.
-#              The script logs command outputs and statuses (with a separator) in a main log file.
-#              For failures, it logs a simplified message in a separate failure log.
+# Script: suspend_users.sh
+# Description:
+#   Suspends users in parallel using the Coder CLI based on a given prefix and a numeric range.
+#   The script automatically determines the proper zero-padding width from the provided range.
+#   For example:
+#     ./suspend_users.sh user 0001 009     --> processes users user0001 to user0009
+#     ./suspend_users.sh user 1 500          --> processes users user001 to user500
 #
-# Usage: ./delete_users.sh <prefix> <lower_bound> <upper_bound>
-# Example: ./delete_users.sh admins 001 030
+#   It logs detailed command outputs and statuses to a main log file,
+#   and records any failures to a separate failure log.
+#
+# Usage: ./suspend_users.sh <prefix> <lower_bound> <upper_bound>
+# Example: ./suspend_users.sh user 0001 009
 #
 # Ensure you are logged in as an admin using the Coder CLI before running this script.
 
@@ -29,7 +34,7 @@ else
     WIDTH="$width_lower"
 fi
 
-# Convert lower and upper bound strings to numbers.
+# Convert the lower and upper bounds to numbers (base-10 to handle any leading zeros).
 START=$((10#$LOWER_BOUND))
 END=$((10#$UPPER_BOUND))
 
@@ -45,7 +50,7 @@ FAIL_LOG="${LOG_DIR}/fail.log"
 LOCKFILE="${LOG_DIR}/lockfile"
 
 # Function: log_msg
-# Logs a message to the specified log file using flock to prevent race conditions.
+# Logs a message safely using flock to prevent concurrent write issues.
 log_msg() {
     local log_file="$1"
     local msg="$2"
@@ -55,21 +60,22 @@ log_msg() {
     ) 200>"$LOCKFILE"
 }
 
-# Function: delete_user
-# Deletes a user based on the given numeric value, logs the executed command and its output.
-delete_user() {
+# Function: suspend_user
+# Suspends a single user by constructing the username with proper zero-padding,
+# then calling the Coder CLI to suspend the user.
+suspend_user() {
     local i="$1"
-    # Format the username using the calculated WIDTH for zero-padding.
+    # Format the user number with zero-padding as determined.
     user=$(printf "%s%0*d" "$PREFIX" "$WIDTH" "$i")
     
-    # Construct the deletion command using the Coder CLI.
-    cmd="coder users delete \"$user\""
+    # Build the suspension command.
+    cmd="echo yes | coder users suspend \"$user\""
     
-    # Capture command output (both stdout and stderr) and exit code.
+    # Execute the command, capturing both stdout and stderr.
     out=$(eval $cmd 2>&1)
     exit_code=$?
     
-    # Build the log message for the main command log.
+    # Construct the log message.
     if [ $exit_code -eq 0 ]; then
         log_message="SUCCESS: $cmd (exit code: $exit_code)
 Output:
@@ -84,10 +90,10 @@ $out
 "
     fi
 
-    # Log the output.
+    # Log to the main command log.
     log_msg "$COMMAND_LOG" "$log_message"
-
-    # For failures, log a simplified message in the failure log.
+    
+    # For failures, also log a simplified message in the failure log.
     if [ $exit_code -ne 0 ]; then
         fail_message="FAILURE: $cmd (exit code: $exit_code)
 ------
@@ -96,24 +102,24 @@ $out
     fi
 }
 
-# Export functions and variables for parallel execution in subshells.
+# Export necessary functions and variables for parallel execution.
 export PREFIX WIDTH
-export LOG_DIR COMMAND_LOG FAIL_LOG LOCKFILE
+export COMMAND_LOG FAIL_LOG LOCKFILE
 export -f log_msg
-export -f delete_user
+export -f suspend_user
 
-# Run user deletion in parallel for the given range.
+# Suspend users in parallel from START to END.
 for (( i = START; i <= END; i++ )); do
-    delete_user "$i" &
+    suspend_user "$i" &
 done
 
 # Wait for all background processes to finish.
 wait
 
-echo "User deletion completed. Logs are stored in ${LOG_DIR}"
+echo "User suspension completed. Logs are stored in ${LOG_DIR}"
 
-# Notify if a failure log was created.
-if [ -f "$FAIL_LOG" ]; then
+# Notify if a failure log exists and contains content.
+if [ -f "$FAIL_LOG" ] && [ -s "$FAIL_LOG" ]; then
     echo "Failure log created: ${FAIL_LOG}"
 fi
 

@@ -2,12 +2,13 @@
 # Script: process_users_with_confirmation.sh
 # Description:
 #   This script processes users in parallel based on a given prefix and numeric range.
-#   Before executing any commands, it shows a summary and asks for confirmation.
+#   It automatically determines the proper zero-padding width from the provided lower and upper bounds.
+#   Before executing any commands, it displays a summary of the range (using proper padding) and asks for confirmation.
 #   It sets up a unique logs directory, logs detailed outputs to a main log file,
 #   and logs any failures to a separate failure log.
 #
-# Usage: ./process_users_with_confirmation.sh <prefix> <start> <end>
-# Example: ./process_users_with_confirmation.sh emp 01 50
+# Usage: ./process_users_with_confirmation.sh <prefix> <lower_bound> <upper_bound>
+# Example: ./process_users_with_confirmation.sh emp 001 050
 #
 # NOTE: Replace the placeholder command inside process_user() with your specific command.
 #
@@ -15,17 +16,31 @@
 
 # Check for required arguments.
 if [ "$#" -ne 3 ]; then
-    echo "Usage: $0 <prefix> <start> <end>"
+    echo "Usage: $0 <prefix> <lower_bound> <upper_bound>"
     exit 1
 fi
 
 PREFIX="$1"
-# Convert start and end to numbers (handling leading zeros)
-START=$((10#$2))
-END=$((10#$3))
+LOWER_BOUND="$2"
+UPPER_BOUND="$3"
 
-# Display summary and ask for confirmation.Comment it out to skip confirmation
-echo "You are about to process users from ${PREFIX}$(printf "%02d" $START) to ${PREFIX}$(printf "%02d" $END)."
+# Determine the proper zero-padding width based on the maximum length of the two bounds.
+width_lower=${#LOWER_BOUND}
+width_upper=${#UPPER_BOUND}
+if [ "$width_upper" -gt "$width_lower" ]; then
+    WIDTH="$width_upper"
+else
+    WIDTH="$width_lower"
+fi
+
+# Convert lower and upper bound strings to numbers (base-10 to ignore any leading zeros).
+START=$((10#$LOWER_BOUND))
+END=$((10#$UPPER_BOUND))
+
+# Display summary and ask for confirmation. (Comment out these lines to skip confirmation.)
+printf "You are about to process users from %s to %s.\n" \
+       "$(printf "%s%0*d" "$PREFIX" "$WIDTH" "$START")" \
+       "$(printf "%s%0*d" "$PREFIX" "$WIDTH" "$END")"
 read -p "Do you want to proceed? (y/N): " confirm
 if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
     echo "Aborting."
@@ -44,7 +59,7 @@ FAIL_LOG="${LOG_DIR}/fail.log"
 LOCKFILE="${LOG_DIR}/lockfile"
 
 # Function: log_msg
-# Logs a message to the specified log file using flock to prevent race conditions.
+# Safely logs a message to the specified log file using flock to prevent concurrent write issues.
 log_msg() {
     local log_file="$1"
     local msg="$2"
@@ -58,14 +73,13 @@ log_msg() {
 # Processes a single user. Replace the placeholder command below with your specific command.
 process_user() {
     local user_number="$1"
-    user=$(printf "%s%02d" "$PREFIX" "$user_number")
+    # Format the user number with the determined zero-padding.
+    user=$(printf "%s%0*d" "$PREFIX" "$WIDTH" "$user_number")
     email="${user}@organisation.com"
     
-    # Placeholder command: modify or uncomment the appropriate command for your use case.
-    # For example, to create a user:
+    # Placeholder command:
+    # Uncomment and modify the line below to perform your actual operation, for example:
     # cmd="coder users create --username \"$user\" --email \"$email\" --password \"$email\""
-    
-    # Example placeholder command:
     cmd="echo Processing user: $user with email: $email"
     
     # Capture command output and exit code.
@@ -100,7 +114,7 @@ $out
 }
 
 # Export necessary variables and functions for parallel execution.
-export PREFIX
+export PREFIX WIDTH
 export LOG_DIR COMMAND_LOG FAIL_LOG LOCKFILE
 export -f log_msg
 export -f process_user
